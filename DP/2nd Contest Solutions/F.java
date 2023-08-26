@@ -3,53 +3,82 @@
 import java.util.*;
 import java.io.*;
 
-public class D {
-
-    static final long mod = (long) 1e9 +7;
+public class F {
+    static int xs, ys;
     static int n;
-    static long maxW;
-    static int v[];
-    static long w[];
-    static long memo[][];
-    public static long dp(int idx, int val){
-        if(idx == n){
-            if(val == 0)
-                return 0;
-            return (long)1e13;
+    static int arr[][];
+    static long memo[];
+    public static long getDist(int x1, int y1, int x2, int y2){
+        return 1L*(x1-x2)*(x1-x2) + 1L*(y1-y2)*(y1-y2);
+    }
+    public static long dp(int mask){
+        if(mask==(1<<n)-1){
+            return 0;
         }
-        if(memo[idx][val] != -1)
-            return memo[idx][val];
-        long ans = dp(idx+1, val);
-        if(val-v[idx]>=0){
-            ans = Math.min(ans, w[idx] + dp(idx+1, val-v[idx]));
+        if(memo[mask] != -1)
+            return memo[mask];
+        long ans = Long.MAX_VALUE;
+        for(int i=0 ; i<n ; i++){
+            if((mask&(1<<i))==0){
+                for(int j=0 ; j<n ; j++){
+                    if((mask&(1<<j))==0){
+                        long dist = getDist(xs, ys, arr[i][0], arr[i][1])
+                                + getDist(arr[i][0], arr[i][1], arr[j][0], arr[j][1])
+                                + getDist(arr[j][0], arr[j][1], xs, ys);
+                        ans = Math.min(ans, dist + dp((mask|(1<<i))|(1<<j)));
+                    }
+                }
+                break;
+            }
         }
-        return memo[idx][val] = ans;
+        return memo[mask] = ans;
+    }
+
+    public static void trace(int mask){
+        if(mask==(1<<n)-1){
+            return;
+        }
+        long ans = dp(mask);
+        for(int i=0 ; i<n ; i++){
+            if((mask&(1<<i))==0){
+                for(int j=0 ; j<n ; j++){
+                    if((mask&(1<<j))==0){
+                        long dist = getDist(xs, ys, arr[i][0], arr[i][1])
+                                + getDist(arr[i][0], arr[i][1], arr[j][0], arr[j][1])
+                                + getDist(arr[j][0], arr[j][1], xs, ys);
+                        long curAns = dist + dp((mask|(1<<i))|(1<<j));
+                        if(ans == curAns){
+                            if(i==j)
+                                pw.print((i+1) + " ");
+                            else
+                                pw.print((i+1) + " " + (j+1)+" ");
+                            pw.print("0 ");
+                            trace((mask|(1<<i))|(1<<j));
+                            return;
+                        }
+                    }
+                }
+            }
+        }
     }
     public static void main(String[] args) throws Exception{
         sc = new Scanner(System.in);
         pw = new PrintWriter(System.out);
 
+        xs = sc.nextInt();
+        ys = sc.nextInt();
         n = sc.nextInt();
-        maxW = sc.nextLong();
-        v = new int[n];
-        w = new long[n];
-        int sum = 0;
-        for(int i=0 ; i<n ; i++) {
-            w[i] = sc.nextLong();
-            v[i] = sc.nextInt();
-            sum += v[i];
-        }
+        arr = new int[n][2];
+        for(int i=0 ; i<n ; i++)
+            for(int j=0 ; j<2 ; j++)
+                arr[i][j] = sc.nextInt();
+        memo = new long[1<<n];
+        Arrays.fill(memo, -1);
+        pw.println(dp(0));
+        pw.print("0 ");
+        trace(0);
+        pw.println();
 
-        memo = new long[n][sum+1];
-        for(long e[] : memo)
-            Arrays.fill(e, -1);
-        for(int i=sum ; i>=0 ; i--){
-            long ansW = dp(0, i);
-            if(ansW<=maxW){
-                pw.println(i);
-                break;
-            }
-        }
 
 
         pw.flush();

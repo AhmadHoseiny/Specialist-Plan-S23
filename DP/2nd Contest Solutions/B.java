@@ -3,53 +3,47 @@
 import java.util.*;
 import java.io.*;
 
-public class D {
+public class B {
 
-    static final long mod = (long) 1e9 +7;
+    static final long mod = (long)1e9+7;
     static int n;
-    static long maxW;
-    static int v[];
-    static long w[];
-    static long memo[][];
-    public static long dp(int idx, int val){
+    static char k[];
+    static int d;
+    static long memo[][][];
+    public static long dp(int can, int modD, int idx){
         if(idx == n){
-            if(val == 0)
-                return 0;
-            return (long)1e13;
+            if(modD == 0)
+                return 1;
+            return 0;
         }
-        if(memo[idx][val] != -1)
-            return memo[idx][val];
-        long ans = dp(idx+1, val);
-        if(val-v[idx]>=0){
-            ans = Math.min(ans, w[idx] + dp(idx+1, val-v[idx]));
+        if(memo[can][modD][idx] != -1)
+            return memo[can][modD][idx];
+        long ans = 0;
+        int UB = (can==0)?k[idx]-'0':9;
+        for(int j=0 ; j<=UB ; j++){
+            int newCan = (can==0 && j==UB)?0:1;
+            int newModD = (modD + j%d)%d;
+            ans += dp(newCan, newModD, idx+1);
+            ans %= mod;
         }
-        return memo[idx][val] = ans;
+        return memo[can][modD][idx] = ans;
     }
     public static void main(String[] args) throws Exception{
         sc = new Scanner(System.in);
         pw = new PrintWriter(System.out);
 
-        n = sc.nextInt();
-        maxW = sc.nextLong();
-        v = new int[n];
-        w = new long[n];
-        int sum = 0;
-        for(int i=0 ; i<n ; i++) {
-            w[i] = sc.nextLong();
-            v[i] = sc.nextInt();
-            sum += v[i];
-        }
+        k = sc.next().toCharArray();
+        n = k.length;
+        d = sc.nextInt();
 
-        memo = new long[n][sum+1];
-        for(long e[] : memo)
-            Arrays.fill(e, -1);
-        for(int i=sum ; i>=0 ; i--){
-            long ansW = dp(0, i);
-            if(ansW<=maxW){
-                pw.println(i);
-                break;
+        memo = new long[2][d][n+1];
+        for(long e[][] : memo){
+            for(long e1[] : e){
+                Arrays.fill(e1, -1);
             }
         }
+        long ans = (dp(0, 0, 0) - 1 + mod) % mod;
+        pw.println(ans);
 
 
         pw.flush();

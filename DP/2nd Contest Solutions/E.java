@@ -3,53 +3,50 @@
 import java.util.*;
 import java.io.*;
 
-public class D {
-
-    static final long mod = (long) 1e9 +7;
+public class E {
     static int n;
-    static long maxW;
-    static int v[];
-    static long w[];
+    static int m;
+    static int a[];
+    static int extra[][];
     static long memo[][];
-    public static long dp(int idx, int val){
-        if(idx == n){
-            if(val == 0)
-                return 0;
-            return (long)1e13;
+    public static long dp(int last, int mask){
+        if(Integer.bitCount(mask) == m)
+            return 0;
+        if(memo[last][mask] != -1)
+            return memo[last][mask];
+        long ans = Long.MIN_VALUE;
+        for(int i=0 ; i<n ; i++){
+            if((mask&(1<<i))==0){
+                ans = Math.max(ans, 1L*a[i] + extra[last][i] + dp(i, mask|(1<<i)));
+            }
         }
-        if(memo[idx][val] != -1)
-            return memo[idx][val];
-        long ans = dp(idx+1, val);
-        if(val-v[idx]>=0){
-            ans = Math.min(ans, w[idx] + dp(idx+1, val-v[idx]));
-        }
-        return memo[idx][val] = ans;
+        return memo[last][mask] = ans;
     }
     public static void main(String[] args) throws Exception{
         sc = new Scanner(System.in);
         pw = new PrintWriter(System.out);
 
         n = sc.nextInt();
-        maxW = sc.nextLong();
-        v = new int[n];
-        w = new long[n];
-        int sum = 0;
-        for(int i=0 ; i<n ; i++) {
-            w[i] = sc.nextLong();
-            v[i] = sc.nextInt();
-            sum += v[i];
+        m = sc.nextInt();
+        int k = sc.nextInt();
+        a = sc.nextIntArray(n);
+        extra = new int[n][n];
+        for(int i=0 ; i<k ; i++){
+            int x = sc.nextInt()-1;
+            int y = sc.nextInt()-1;
+            int c = sc.nextInt();
+            extra[x][y] = c;
         }
-
-        memo = new long[n][sum+1];
-        for(long e[] : memo)
+        memo = new long[n][1<<n];
+        for(long e[] : memo){
             Arrays.fill(e, -1);
-        for(int i=sum ; i>=0 ; i--){
-            long ansW = dp(0, i);
-            if(ansW<=maxW){
-                pw.println(i);
-                break;
-            }
         }
+        long ans = Long.MIN_VALUE;
+        for(int i=0 ; i<n ; i++){
+            ans = Math.max(ans, a[i]+dp(i, 1<<i));
+        }
+        pw.println(ans);
+
 
 
         pw.flush();

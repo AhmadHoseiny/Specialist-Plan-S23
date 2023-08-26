@@ -3,53 +3,41 @@
 import java.util.*;
 import java.io.*;
 
-public class D {
-
-    static final long mod = (long) 1e9 +7;
+public class G {
+    static final long mod = (long)1e9+7;
     static int n;
-    static long maxW;
-    static int v[];
-    static long w[];
-    static long memo[][];
-    public static long dp(int idx, int val){
-        if(idx == n){
-            if(val == 0)
-                return 0;
-            return (long)1e13;
+    static boolean arr[][];
+    static long memo[];
+    public static long dp(int mask){
+        if(mask==(1<<n)-1)
+            return 1;
+        if(memo[mask] != -1)
+            return memo[mask];
+        long ans = 0;
+        int idx = Integer.bitCount(mask);
+        for(int i=0 ; i<n ; i++){
+            if((mask&(1<<i))==0 && arr[idx][i]){
+                ans += dp(mask|(1<<i));
+                ans %= mod;
+            }
         }
-        if(memo[idx][val] != -1)
-            return memo[idx][val];
-        long ans = dp(idx+1, val);
-        if(val-v[idx]>=0){
-            ans = Math.min(ans, w[idx] + dp(idx+1, val-v[idx]));
-        }
-        return memo[idx][val] = ans;
+        return memo[mask] = ans;
     }
     public static void main(String[] args) throws Exception{
         sc = new Scanner(System.in);
         pw = new PrintWriter(System.out);
 
         n = sc.nextInt();
-        maxW = sc.nextLong();
-        v = new int[n];
-        w = new long[n];
-        int sum = 0;
-        for(int i=0 ; i<n ; i++) {
-            w[i] = sc.nextLong();
-            v[i] = sc.nextInt();
-            sum += v[i];
-        }
-
-        memo = new long[n][sum+1];
-        for(long e[] : memo)
-            Arrays.fill(e, -1);
-        for(int i=sum ; i>=0 ; i--){
-            long ansW = dp(0, i);
-            if(ansW<=maxW){
-                pw.println(i);
-                break;
+        arr = new boolean[n][n];
+        for(int i=0 ; i<n ; i++){
+            for(int j=0 ; j<n ; j++){
+                int x = sc.nextInt();
+                arr[i][j] = (x==1)?true:false;
             }
         }
+        memo = new long[1<<n];
+        Arrays.fill(memo, -1);
+        pw.println(dp(0));
 
 
         pw.flush();

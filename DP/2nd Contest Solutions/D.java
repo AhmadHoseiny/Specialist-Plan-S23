@@ -5,51 +5,61 @@ import java.io.*;
 
 public class D {
 
-    static final long mod = (long) 1e9 +7;
+    static final long mod = (long)1e9+7;
     static int n;
-    static long maxW;
-    static int v[];
-    static long w[];
-    static long memo[][];
-    public static long dp(int idx, int val){
-        if(idx == n){
-            if(val == 0)
-                return 0;
-            return (long)1e13;
-        }
-        if(memo[idx][val] != -1)
-            return memo[idx][val];
-        long ans = dp(idx+1, val);
-        if(val-v[idx]>=0){
-            ans = Math.min(ans, w[idx] + dp(idx+1, val-v[idx]));
-        }
-        return memo[idx][val] = ans;
+    static char l[];
+    static char r[];
+    static int m;
+    static int d;
+    static long memo[][][][];
+    static int mods[][];
+    public static void pre(){
+        mods = new int[10][m];
+        for(int j=0 ; j<10 ; j++)
+            for(int modM=0 ; modM<m ; modM++)
+                mods[j][modM] = (modM*10 + j)%m;
+
     }
+    public static long dp(int canD, int canU, int modM, int idx){
+        if(idx == n){
+            if(modM == 0)
+                return 1;
+            return 0;
+        }
+        if(memo[canD][canU][modM][idx] != -1)
+            return memo[canD][canU][modM][idx];
+        long ans = 0;
+        int LB = (canD==0)?l[idx]-'0':0;
+        int UB = (canU==0)?r[idx]-'0':9;
+        for(int j=LB ; j<=UB ; j++){
+            if(((idx&1)==1 && j!=d) || ((idx&1)==0) && j==d)
+                continue;
+            int newCanU = (canU==0 && j==UB)?0:1;
+            int newCanD = (canD==0 && j==LB)?0:1;
+            int newModM = mods[j][modM];
+            ans += dp(newCanD, newCanU, newModM, idx+1);
+            ans %= mod;
+        }
+        return memo[canD][canU][modM][idx] = ans;
+    }
+
     public static void main(String[] args) throws Exception{
         sc = new Scanner(System.in);
         pw = new PrintWriter(System.out);
 
-        n = sc.nextInt();
-        maxW = sc.nextLong();
-        v = new int[n];
-        w = new long[n];
-        int sum = 0;
-        for(int i=0 ; i<n ; i++) {
-            w[i] = sc.nextLong();
-            v[i] = sc.nextInt();
-            sum += v[i];
-        }
+        m = sc.nextInt();
+        d = sc.nextInt();
+        l = sc.next().toCharArray();
+        r = sc.next().toCharArray();
+        n = l.length;
 
-        memo = new long[n][sum+1];
-        for(long e[] : memo)
-            Arrays.fill(e, -1);
-        for(int i=sum ; i>=0 ; i--){
-            long ansW = dp(0, i);
-            if(ansW<=maxW){
-                pw.println(i);
-                break;
-            }
-        }
+        memo = new long[2][2][m][n];
+        for(long e[][][] : memo)
+            for(long e1[][] : e)
+                for(long e2[] : e1)
+                    Arrays.fill(e2, -1);
+        pre();
+        pw.println(dp(0, 0, 0, 0));
 
 
         pw.flush();

@@ -3,53 +3,67 @@
 import java.util.*;
 import java.io.*;
 
-public class D {
-
-    static final long mod = (long) 1e9 +7;
+public class A {
     static int n;
-    static long maxW;
-    static int v[];
-    static long w[];
+    static int r[];
+    static int c[];
     static long memo[][];
-    public static long dp(int idx, int val){
-        if(idx == n){
-            if(val == 0)
-                return 0;
-            return (long)1e13;
+    public static long dp(int st, int en){
+        if(st == en)
+            return 0;
+        if(memo[st][en] != -1)
+            return memo[st][en];
+        long ans = Long.MAX_VALUE;
+        for(int split=st ; split<en ; split++){
+            long curAns = 1L*r[st]*c[split]*c[en] + dp(st, split) + dp(split+1, en);
+            ans = Math.min(ans, curAns);
         }
-        if(memo[idx][val] != -1)
-            return memo[idx][val];
-        long ans = dp(idx+1, val);
-        if(val-v[idx]>=0){
-            ans = Math.min(ans, w[idx] + dp(idx+1, val-v[idx]));
+        return memo[st][en] = ans;
+    }
+    public static void trace(int st, int en){
+        if(st == en){
+            pw.print("A" + (st+1));
+            return;
         }
-        return memo[idx][val] = ans;
+        long ans = dp(st, en);
+        int fSplit = -1;
+        for(int split=st ; split<en ; split++){
+            long curAns = 1L*r[st]*c[split]*c[en] + dp(st, split) + dp(split+1, en);
+            if(ans == curAns){
+                fSplit = split;
+                break;
+            }
+        }
+        pw.print("(");
+        trace(st, fSplit);
+        pw.print(" x ");
+        trace(fSplit+1, en);
+        pw.print(")");
     }
     public static void main(String[] args) throws Exception{
         sc = new Scanner(System.in);
         pw = new PrintWriter(System.out);
 
-        n = sc.nextInt();
-        maxW = sc.nextLong();
-        v = new int[n];
-        w = new long[n];
-        int sum = 0;
-        for(int i=0 ; i<n ; i++) {
-            w[i] = sc.nextLong();
-            v[i] = sc.nextInt();
-            sum += v[i];
+        int tc = 1;
+        while(true){
+            n = sc.nextInt();
+            if(n==0)
+                break;
+            pw.print("Case " + (tc++) + ": ");
+            r = new int[n];
+            c = new int[n];
+            for(int i=0 ; i<n ; i++){
+                r[i] = sc.nextInt();
+                c[i] = sc.nextInt();
+            }
+            memo = new long[n][n];
+            for(long e[] : memo)
+                Arrays.fill(e, -1);
+            dp(0, n-1);
+            trace(0, n-1);
+            pw.println();
         }
 
-        memo = new long[n][sum+1];
-        for(long e[] : memo)
-            Arrays.fill(e, -1);
-        for(int i=sum ; i>=0 ; i--){
-            long ansW = dp(0, i);
-            if(ansW<=maxW){
-                pw.println(i);
-                break;
-            }
-        }
 
 
         pw.flush();
